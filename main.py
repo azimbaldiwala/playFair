@@ -1,6 +1,5 @@
+# Author: Azim Mustufa Baldiwala GITHUB: github.com/azimbaldiwala
 
-key = 'playfair' # key for encryption.
-plain_text = "hello"
 
 def generate_table(key_):
     alpahbets = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 
@@ -87,13 +86,89 @@ def make_pairs(plain_text):
             plain_text += 'x'
         
         index_ = 0 
-        while index_ < len(plain_text) : 
-           if index_ % 2 == 0:
-               pairs.append(f'{plain_text[index_]}{plain_text[index_ + 1]}')
-           index_ += 1 
-
+        while index_ < len(plain_text): 
+            if index_ % 2 == 0 or index_ == 0:
+                pairs.append(f'{plain_text[index_]}{plain_text[index_ + 1]}')
+            index_ += 1 
+        return pairs
     pairs = set_pairs(plain_text)
     return pairs 
 
-print(make_pairs('hello')) 
 
+def encrypt(pairs: list, table):
+    final_str = ''
+    def check_row_col(a1, a2, table):
+        row_value_a1 = -1
+        row_value_a2 = -1
+        col_value_a1 = -1 
+        col_value_a2 = -1
+        for i in range(5):
+            for j in range(5):
+                if table[i][j] == a1:
+                    row_value_a1 = i
+                    col_value_a1 = j
+        
+        for i in range(5):
+            for j in range(5):
+                if table[i][j] == a2:
+                    row_value_a2 = i 
+                    col_value_a2 = j
+        if row_value_a1 == row_value_a2:
+            return 'r', col_value_a1, row_value_a1, col_value_a2, row_value_a2
+        
+        if col_value_a1 == col_value_a2:
+            return 'c', col_value_a1, row_value_a1, col_value_a2, row_value_a2
+        
+        return 't', col_value_a1, row_value_a1, col_value_a2, row_value_a2
+
+    for i in range(len(pairs)):
+        a1 = pairs[i][0]
+        a2 = pairs[i][1]
+
+        if check_row_col(a1, a2, table)[0] == 'r':
+            _, r1, c1, r2, c2 = check_row_col(a1, a2, table)
+
+            if r1 < 4:
+                final_str += table[c1][r1+1]
+            else:
+                final_str += table[c1][0]
+            
+            if r2 < 4:
+                final_str += table[c2][r2+1]
+            else:
+                final_str += table[c2][0]
+          
+
+        elif check_row_col(a1, a2, table)[0] == 'c':
+            _, r1, c1, r2, c2 = check_row_col(a1, a2, table)
+
+            if c1 < 4:
+                final_str += table[c1+1][r1]
+            else:
+                final_str += table[0][r1]
+            
+            if c2 < 4:
+                final_str += table[c2+1][r2]
+            else:
+                final_str += table[0][r2]
+
+        else:
+            _, r1, c1, r2, c2 = check_row_col(a1, a2, table)
+
+            if c1 < c2:
+                final_str += table[c1][r2]
+                final_str += table[c2][r1]
+            else:
+                final_str += table[c2][r1]
+                final_str += table[c1][r2]
+    return final_str
+
+
+# Driver code...
+
+plain_text = input("Enter plain text: ")
+key = input("Enter the key: ")
+
+
+print("Encrypted value: ")
+print(encrypt(make_pairs(plain_text), generate_table(key)))
